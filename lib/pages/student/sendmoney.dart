@@ -210,6 +210,7 @@ class _SendMoneyState extends State<SendMoney> {
                           print('User Data: $userData');
                           String firstStringValue = userList[0]['20MID0225'] ?? '';
                           String secondStringValue = userList[0]['regno'] ?? '';
+                          String third=userList[0]['name']?? '';
                           print('strinf');
                           print(firstStringValue);
                       
@@ -218,7 +219,8 @@ class _SendMoneyState extends State<SendMoney> {
   MaterialPageRoute(
     builder: (context) => SendMoney_1(
         firstStringValue: firstStringValue,
-            secondStringValue: secondStringValue,
+            secondStringValue: secondStringValue, third: third,
+
     ),
   ),
 );

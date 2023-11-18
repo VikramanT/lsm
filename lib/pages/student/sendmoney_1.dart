@@ -10,9 +10,11 @@ import 'package:web3dart/web3dart.dart';
 class SendMoney_1 extends StatefulWidget {
   final String firstStringValue;
   final String secondStringValue;
+  final String third;
    SendMoney_1({
     required this.firstStringValue,
     required this.secondStringValue,
+    required this.third
   });
   @override
   _SendMoney_1State createState() => _SendMoney_1State();
@@ -163,7 +165,7 @@ class _SendMoney_1State extends State<SendMoney_1> {
               const SizedBox(
                 height: 100,
               ),
-               DottedBorderContainer(amountController: amountController),
+               DottedBorderContainer(amountController: amountController,nam:widget.secondStringValue,br: widget.third,),
               const SizedBox(height: 220,),
                                 Align(
       alignment: Alignment.bottomCenter,
@@ -205,8 +207,10 @@ class _SendMoney_1State extends State<SendMoney_1> {
 }
 class DottedBorderContainer extends StatelessWidget {
   final TextEditingController amountController;
+  final String nam;
+  final String br;
 
-  DottedBorderContainer({required this.amountController});
+  DottedBorderContainer({required this.amountController,required this.nam,required this.br});
 
   @override
   Widget build(BuildContext context) {
@@ -222,17 +226,17 @@ class DottedBorderContainer extends StatelessWidget {
             Padding(padding: EdgeInsets.only(bottom: 110)),
             Container(child: Image.asset("assets/images/hum.png")),
             Text(
-              "PayingSheethl P",
+              "Paying $br",
               style: GoogleFonts.manrope(
                   textStyle: TextStyle(color: Colors.black, fontSize: 20.0, fontWeight: FontWeight.w500)),
             ),
             Text(
-              "20MID0206",
+              "$nam",
               style: GoogleFonts.manrope(
                   textStyle: TextStyle(color: Colors.black, fontSize: 20.0, fontWeight: FontWeight.w500)),
             ),
             Text(
-              "Wallet  name:Sheethll P",
+              "Wallet  name: $br",
               style: GoogleFonts.manrope(
                   textStyle: TextStyle(color: Colors.black, fontSize: 20.0, fontWeight: FontWeight.w500)),
             ),
