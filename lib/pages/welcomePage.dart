@@ -2,6 +2,8 @@ import 'dart:convert';
 
 import 'package:app/main.dart';
 import 'package:app/pages/deposit.dart';
+import 'package:app/pages/student/menu.dart';
+import 'package:app/pages/student/sendmoney.dart';
 import 'package:convert/convert.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -423,7 +425,10 @@ Future<void> broadcastSavedTransaction() async {
   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
   children: <Widget>[
     MaterialButton(
-      onPressed: () {},
+      onPressed: () async {
+                      var response = await sendCoin();
+                      print(response);
+                    },
       child: Image.asset('assets/compare_arrows.png', height: MediaQuery.of(context).size.width < 600 ? 80.0 : 120.0),
     ),
     MaterialButton(
@@ -443,14 +448,26 @@ Future<void> broadcastSavedTransaction() async {
     ),
     MaterialButton(
       onPressed: () {
-                     
+                     Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => SendMoney(),
+                        ),
+                      );
                     },
 
       
       child: Image.asset('assets/arrow_downward.png', height: MediaQuery.of(context).size.width < 600 ? 80.0 : 120.0),
     ),
     MaterialButton(
-      onPressed: () {},
+      onPressed: () {
+        Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) =>  menu(),
+                        ),
+                      );
+      },
       child: Image.asset('assets/menu.png', height: MediaQuery.of(context).size.width < 600 ? 80.0 : 120.0),
     ),
   ],

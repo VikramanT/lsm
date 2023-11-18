@@ -148,8 +148,8 @@ class _MyHomePage1State extends State<MyHomePage1> {
 
                               ),
                               settings: RouteSettings(
-      arguments: {"response": response_1, "amount":myAmount },
-    ),
+        arguments: {"response": response_1, "amount":myAmount },
+       ),
                             ),
                           );
                         } else {
