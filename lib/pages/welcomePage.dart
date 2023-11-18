@@ -1,10 +1,13 @@
 import 'dart:convert';
 
+import 'package:app/main.dart';
 import 'package:app/pages/deposit.dart';
 import 'package:convert/convert.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:app/pages/createWallet.dart';
+import 'package:google_fonts/google_fonts.dart';
+import 'package:provider/provider.dart';
 import 'package:web3dart/web3dart.dart';
 import 'package:http/http.dart';
 import 'package:flutter/services.dart';
@@ -19,13 +22,14 @@ import 'package:http/http.dart' as http;
 
 class MyHomePage extends StatefulWidget {
   const MyHomePage({Key? key, required this.title}) : super(key: key);
-  final String title;
+  final int title;
 
   @override
   State<MyHomePage> createState() => _MyHomePageState();
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  
   late Client httpClient;
   late Web3Client ethClient;
   String privAddress = "";
@@ -49,9 +53,17 @@ class _MyHomePageState extends State<MyHomePage> {
     ethClient = Web3Client(
         "https://sepolia.infura.io/v3/94f7fea0f45d4643b095ae8069e90f50",
         httpClient);
+        loadTransactionHistory();
     details();
   }
 
+  Future<void> loadTransactionHistory() async {
+    try {
+      await context.read<TransactionModelProvider>().loadTransactionHistory();
+    } catch (error) {
+      print("Error loading transaction history: $error");
+    }
+  }
   Future<void> details() async {
     try {
       setState(() {
@@ -343,8 +355,12 @@ Future<void> broadcastSavedTransaction() async {
 
 
 
+
+
   @override
   Widget build(BuildContext context) {
+    var transactionHistory = context.watch<TransactionModelProvider>().transactionHistory;
+    // final Map<String, dynamic>? args = ModalRoute.of(context)?.settings.arguments as Map<String, dynamic>?;
     final user = FirebaseAuth.instance.currentUser;
     if (user?.photoURL == null) {
       pro_pic = "assets/images/logo.png";
@@ -357,180 +373,414 @@ Future<void> broadcastSavedTransaction() async {
       u_name = user!.displayName;
     }
     return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.title),
-      ),
-      body: isLoading
+      backgroundColor: Color(0xff213452),
+           body: isLoading
           ? const Center(child: CircularProgressIndicator())
-          : ListView(
-              children: [
-                Container(
-                  color: Colors.blue[600],
-                  height: 150,
-                  alignment: Alignment.center,
-                  child: Container(
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: Colors.white,
-                      image: DecorationImage(
-                        image: NetworkImage(pro_pic),
-                        scale: 0.1,
-                      ),
-                    ),
-                  ),
-                ),
-                Container(
-                  margin: const EdgeInsets.all(20),
-                  child: Text(
-                    u_name,
-                    style: const TextStyle(
-                      fontSize: 20,
-                      color: Colors.blueAccent,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-                Container(
-                  margin: const EdgeInsets.all(5),
-                  alignment: Alignment.center,
-                  height: 100,
-                  width: MediaQuery.of(context).size.width,
-                  child: const Text(
-                    "Balance",
-                    style: TextStyle(
-                      fontSize: 70,
-                      color: Colors.grey,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-                Container(
-                  margin: const EdgeInsets.all(5),
-                  alignment: Alignment.center,
-                  height: 50,
-                  width: MediaQuery.of(context).size.width,
-                  child: Text(
-                    balance == null ? "0 GLD" : "$balance GLD",
-                    style: const TextStyle(
-                      fontSize: 50,
-                      color: Colors.blueAccent,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-                Container(
-                  margin: const EdgeInsets.all(20),
-                  child: ElevatedButton(
-                    onPressed: () async {
-                      var response = await sendCoin();
-                      print(response);
-                    },
-                    style: ButtonStyle(
-                      backgroundColor:
-                          MaterialStateProperty.all<Color>(Colors.green),
-                    ),
-                    child: const Text("Send Money"),
-                  ),
-                ),
-                Container(
-                  margin: const EdgeInsets.all(10),
-                  child: ElevatedButton(
-                    onPressed: () async {
-                      try {
-                        var updatedBalance = await getBalance(credentials);
-                        setState(() {
-                          balance = updatedBalance;
-                        });
-                      } catch (error) {
-                        print("Error fetching balance: $error");
-                      }
-                    },
-                    child: const Text("Refresh Page"),
-                  ),
-                ),
-                ElevatedButton(
-                  onPressed: () async {
-                //    await performOfflineTransaction();
-               // createOfflineTransaction();
-              // generateTransactionHash("803388097393d1956cc9c60d2ef979ccdd042e2cdeef2ffc07ad6a1f79344034", targetAddress);
-              await initiateOfflineTransaction();
-                  },
-                  child: Text("Offline Transaction"),
-                ),
-                Container(
-                  margin: const EdgeInsets.all(10),
-                  child: ElevatedButton(
-                    // onPressed: () async {
-                    //   try {
-                    //     var bigAmount = BigInt.from(myAmount);
-                    //     await deposit("deposit", [
-                    //       EthereumAddress.fromHex(
-                    //           "0x603154295A66cb1bE637EE6Ce4639e298c90Eb1C"),
-                    //       bigAmount
-                    //     ]);
-                    //     var updatedBalance = await getBalance(credentials);
-                    //     setState(() {
-                    //       balance = updatedBalance;
-                    //     });
-                    //   } catch (error) {
-                    //     print("Error deposit: $error");
-                    //   }
-                    // },
-                    onPressed: () {
-                      Navigator.push(
+          : 
+           Column(
+          children: <Widget>[
+            Container(
+              padding: EdgeInsets.only(top:90,bottom:20),
+              color: Color(0xff213452),
+              child:
+
+               Column(
+                 children: [
+                   Container(
+                    padding: EdgeInsets.only(top: 30,bottom: 30),
+                    margin: EdgeInsets.only(left: 50,right:50),
+                    decoration: BoxDecoration(image: DecorationImage(image: AssetImage('assets/backblur.png'),
+                     fit: BoxFit.fill,
+                    )),
+                     child: 
+                     Column(
+                       children: [
+                          Center(
+                          child: Text(
+                            'Your balance',
+                            style: GoogleFonts.poppins(textStyle: TextStyle(color: Colors.white,fontSize: 20)),
+                          ),
+                                 ),
+                                 SizedBox(height: 20,),
+                         Center(
+                          child:
+                          Container(
+                            padding: EdgeInsets.only(left: 20,right: 30,bottom:15,top:10,),
+                            decoration: BoxDecoration(image: DecorationImage(image: AssetImage('assets/dotted.png'),
+                     fit: BoxFit.fill,
+                    )),
+
+                            child: Text(
+                            '₹ $balance',
+                            style: GoogleFonts.rokkitt(textStyle: TextStyle(color: Colors.white,fontSize: 36)),
+                          ),
+                                 ),
+                         ),
+                       ],
+                     ),
+                   ),
+                   Row(
+  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+  children: <Widget>[
+    MaterialButton(
+      onPressed: () {},
+      child: Image.asset('assets/compare_arrows.png', height: MediaQuery.of(context).size.width < 600 ? 80.0 : 120.0),
+    ),
+    MaterialButton(
+      onPressed: () async {
+        var result= Navigator.push(
                         context,
                         MaterialPageRoute(
                           builder: (context) => const MyHomePage1(),
                         ),
                       );
+                      
+        
+
+
+      },
+      child: Image.asset('assets/arrow_upward.png', height: MediaQuery.of(context).size.width < 600 ? 80.0 : 120.0),
+    ),
+    MaterialButton(
+      onPressed: () {
+                     
                     },
-                    child: const Text("Deposit"),
+
+      
+      child: Image.asset('assets/arrow_downward.png', height: MediaQuery.of(context).size.width < 600 ? 80.0 : 120.0),
+    ),
+    MaterialButton(
+      onPressed: () {},
+      child: Image.asset('assets/menu.png', height: MediaQuery.of(context).size.width < 600 ? 80.0 : 120.0),
+    ),
+  ],
+),
+                 ],
+               ),
+            ),
+   
+//const SizedBox(height: 50,),
+
+
+          Expanded(
+  child: Container(
+    decoration: BoxDecoration(color: Colors.white,
+      borderRadius: BorderRadius.only(
+        topLeft: Radius.circular(30.0),
+        topRight: Radius.circular(30.0),
+      )
+    ),
+    child: Column(
+      children: <Widget>[
+        const SizedBox(height: 20,),
+        Text(
+          'Transaction History',
+          textAlign:TextAlign.left,
+          style: GoogleFonts.poppins(textStyle: TextStyle(color: Color(0xff082431),fontSize: 18,)),
+        ),
+        Divider(
+              color: Color(0xff082431)
+            ),
+        Expanded(
+          child: ListView.builder(
+            itemCount: transactionHistory.length,
+            itemBuilder: (context, index) {
+              var transaction = transactionHistory[index];
+              return 
+              // Container(
+              //   child: Column(
+              //     mainAxisAlignment: MainAxisAlignment.center,
+              //     children: [
+              //      Row(
+              //       children: [
+                      
+              //         Container(width: 50,height: 50,
+              //           child:Image.asset('assets/shuttle_1.png'),),
+              //         Text("Shuttle ride"),
+              //         const SizedBox(width: 50,),
+              //         Text("₹ 15.00")
+              //       ],
+              //      ),
+              //      Text("Nov 18, 2023 at 12:00 pm "),
+                   
+              //     ],
+                  
+              //   ),
+              // );
+               Container(
+      padding: const
+ 
+EdgeInsets.all(16.0),
+      // decoration: BoxDecoration(
+      //   borderRadius: BorderRadius.circular(8.0),
+      //   border: Border.all(color: Colors.grey),
+      // ),
+      child: Column(
+        children: [
+          Row(
+            children: [
+              Image.asset('assets/shuttle_1.png', width: 50, height: 50),
+              SizedBox(width: 8.0),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(children: [
+                    Container(
+                      margin: EdgeInsets.only(right: 100),
+                      child: Text(
+                      ' ${transaction.response}',
+                       style: GoogleFonts.poppins(textStyle: TextStyle(color: Color(0xff213452),fontSize: 14.0, fontWeight: FontWeight.w500))
+                                       
+                                      ),
+                    ),
+               //   const SizedBox(width: 120,),
+                  Text(
+                    '₹ ${transaction.amount}',
+                    style: GoogleFonts.poppins(textStyle: TextStyle(color: Color(0xff213452),fontSize: 14.0, fontWeight: FontWeight.w500))
                   ),
-                ),
-                Container(
-                  margin: const EdgeInsets.all(10),
-                  child: ElevatedButton(
-                    onPressed: () async {
-                      try {
-                        var bigAmount = BigInt.from(myAmount);
-                        await withdraw("withdraw", [bigAmount]);
-                        var updatedBalance = await getBalance(credentials);
-                        setState(() {
-                          balance = updatedBalance;
-                        });
-                      } catch (error) {
-                        print("Error withdraw: $error");
-                      }
-                    },
-                    child: const Text("Withdraw"),
-                  ),
-                ),
-                // Example: Calling broadcastOfflineTransaction when a button is pressed
-ElevatedButton(
-  onPressed: () async {
-    //await broadcastOfflineTransaction();
-   await broadcastSavedTransaction();
-  },
-  child: const Text("Broadcast Offline Transaction"),
+                  ],),
+                  
+                  
+
+      //             Row(children: [
+      //                Text(
+      //               "Nov 17, 2023 at 9:50 am",
+      //               style: GoogleFonts.poppins(textStyle: TextStyle(color:Colors.grey,fontSize: 14.0, fontWeight: FontWeight.w300))
+      //             ),
+      // const SizedBox(width: 55,),
+      //                 Text(
+      //               "Felix Logistics",
+      //              style: GoogleFonts.poppins(textStyle: TextStyle(color:Colors.grey,fontSize: 14.0, fontWeight: FontWeight.w300))
+      //             ),
+
+      //             ],)
+                
+                ],
+              ),
+           
+            ],
+          ),
+        
+        ],
+      ),
+    );
+              // ListTile(
+              //   title: Text('Transaction ${index + 1}',style: GoogleFonts.poppins(textStyle: TextStyle(color: Colors.black,fontSize: 18,))
+              //   ),
+              //   subtitle: Text('Date - Time\nAmount'),
+              // );
+            },
+          ),
+        ),
+        Container(height: 30,
+          width: double.infinity,
+          decoration: BoxDecoration(color: Color(0xff213452),),
+          child:  
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+
+              Center(child: 
+              Text(
+                        "Last sync on 04-10-2023 10:57 am",
+                        style: GoogleFonts.manuale(textStyle: TextStyle(color:Colors.white,fontSize: 17.0, fontWeight: FontWeight.w300)))),
+                  Transform.translate(
+          offset: Offset(0, -5.0), // Adjust the vertical offset as needed
+          child: IconButton(
+            icon: Icon(
+              Icons.refresh,
+              color: Colors.white,
+            ),
+            onPressed: () {
+              // Manually trigger the refresh
+              // You can call your refresh logic here
+              // For example, you can update the transaction history
+            },
+          ),
+        ),
+                        
+            ],
+          )
+          )
+      ],
+    ),
+  ),
 ),
 
-                Container(
-                  margin: const EdgeInsets.only(top: 30, right: 30),
-                  alignment: Alignment.bottomRight,
-                  child: FloatingActionButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const CreateWallet(),
-                        ),
-                      );
-                    },
-                    child: const Icon(Icons.add),
-                  ),
-                ),
-              ],
-            ),
+          ],
+        ),
+// 
+// 
+// 
+// ListView(
+//               children: [
+//                 Container(
+//                   color: Colors.blue[600],
+//                   height: 150,
+//                   alignment: Alignment.center,
+//                   child: Container(
+//                     decoration: BoxDecoration(
+//                       shape: BoxShape.circle,
+//                       color: Colors.white,
+//                       image: DecorationImage(
+//                         image: NetworkImage(pro_pic),
+//                         scale: 0.1,
+//                       ),
+//                     ),
+//                   ),
+//                 ),
+//                 Container(
+//                   margin: const EdgeInsets.all(20),
+//                   child: Text(
+//                     u_name,
+//                     style: const TextStyle(
+//                       fontSize: 20,
+//                       color: Colors.blueAccent,
+//                       fontWeight: FontWeight.bold,
+//                     ),
+//                   ),
+//                 ),
+//                 Container(
+//                   margin: const EdgeInsets.all(5),
+//                   alignment: Alignment.center,
+//                   height: 100,
+//                   width: MediaQuery.of(context).size.width,
+//                   child: const Text(
+//                     "Balance",
+//                     style: TextStyle(
+//                       fontSize: 70,
+//                       color: Colors.grey,
+//                       fontWeight: FontWeight.bold,
+//                     ),
+//                   ),
+//                 ),
+//                 Container(
+//                   margin: const EdgeInsets.all(5),
+//                   alignment: Alignment.center,
+//                   height: 50,
+//                   width: MediaQuery.of(context).size.width,
+//                   child: Text(
+//                     balance == null ? "0 GLD" : "$balance GLD",
+//                     style: const TextStyle(
+//                       fontSize: 50,
+//                       color: Colors.blueAccent,
+//                       fontWeight: FontWeight.bold,
+//                     ),
+//                   ),
+//                 ),
+//                 Container(
+//                   margin: const EdgeInsets.all(20),
+//                   child: ElevatedButton(
+//                     onPressed: () async {
+//                       var response = await sendCoin();
+//                       print(response);
+//                     },
+//                     style: ButtonStyle(
+//                       backgroundColor:
+//                           MaterialStateProperty.all<Color>(Colors.green),
+//                     ),
+//                     child: const Text("Send Money"),
+//                   ),
+//                 ),
+//                 Container(
+//                   margin: const EdgeInsets.all(10),
+//                   child: ElevatedButton(
+//                     onPressed: () async {
+//                       try {
+//                         var updatedBalance = await getBalance(credentials);
+//                         setState(() {
+//                           balance = updatedBalance;
+//                         });
+//                       } catch (error) {
+//                         print("Error fetching balance: $error");
+//                       }
+//                     },
+//                     child: const Text("Refresh Page"),
+//                   ),
+//                 ),
+//                 ElevatedButton(
+//                   onPressed: () async {
+//                 //    await performOfflineTransaction();
+//                // createOfflineTransaction();
+//               // generateTransactionHash("803388097393d1956cc9c60d2ef979ccdd042e2cdeef2ffc07ad6a1f79344034", targetAddress);
+//               await initiateOfflineTransaction();
+//                   },
+//                   child: Text("Offline Transaction"),
+//                 ),
+//                 Container(
+//                   margin: const EdgeInsets.all(10),
+//                   child: ElevatedButton(
+//                     // onPressed: () async {
+//                     //   try {
+//                     //     var bigAmount = BigInt.from(myAmount);
+//                     //     await deposit("deposit", [
+//                     //       EthereumAddress.fromHex(
+//                     //           "0x603154295A66cb1bE637EE6Ce4639e298c90Eb1C"),
+//                     //       bigAmount
+//                     //     ]);
+//                     //     var updatedBalance = await getBalance(credentials);
+//                     //     setState(() {
+//                     //       balance = updatedBalance;
+//                     //     });
+//                     //   } catch (error) {
+//                     //     print("Error deposit: $error");
+//                     //   }
+//                     // },
+//                     onPressed: () {
+//                       Navigator.push(
+//                         context,
+//                         MaterialPageRoute(
+//                           builder: (context) => const MyHomePage1(),
+//                         ),
+//                       );
+//                     },
+//                     child: const Text("Deposit"),
+//                   ),
+//                 ),
+//                 Container(
+//                   margin: const EdgeInsets.all(10),
+//                   child: ElevatedButton(
+//                     onPressed: () async {
+//                       try {
+//                         var bigAmount = BigInt.from(myAmount);
+//                         await withdraw("withdraw", [bigAmount]);
+//                         var updatedBalance = await getBalance(credentials);
+//                         setState(() {
+//                           balance = updatedBalance;
+//                         });
+//                       } catch (error) {
+//                         print("Error withdraw: $error");
+//                       }
+//                     },
+//                     child: const Text("Withdraw"),
+//                   ),
+//                 ),
+//                 // Example: Calling broadcastOfflineTransaction when a button is pressed
+// ElevatedButton(
+//   onPressed: () async {
+//     //await broadcastOfflineTransaction();
+//    await broadcastSavedTransaction();
+//   },
+//   child: const Text("Broadcast Offline Transaction"),
+// ),
+
+//                 Container(
+//                   margin: const EdgeInsets.only(top: 30, right: 30),
+//                   alignment: Alignment.bottomRight,
+//                   child: FloatingActionButton(
+//                     onPressed: () {
+//                       Navigator.push(
+//                         context,
+//                         MaterialPageRoute(
+//                           builder: (context) => const CreateWallet(),
+//                         ),
+//                       );
+//                     },
+//                     child: const Icon(Icons.add),
+//                   ),
+//                 ),
+//               ],
+//             ),
     );
   }
 }

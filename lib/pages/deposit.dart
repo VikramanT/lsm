@@ -5,9 +5,12 @@ import 'package:app/utilities/firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart';
+import 'package:provider/provider.dart';
 import 'package:web3dart/web3dart.dart';
 import 'package:razorpay_flutter/razorpay_flutter.dart';
 import 'package:google_fonts/google_fonts.dart';
+
+import '../main.dart';
 
 class MyHomePage1 extends StatefulWidget {
   const MyHomePage1({Key? key}) : super(key: key);
@@ -61,13 +64,25 @@ class _MyHomePage1State extends State<MyHomePage1> {
     });
     //
   }
+  var response_1;
 
   Color kGrey = const Color.fromRGBO(246, 246, 246, 1);
   Color kYellow = const Color.fromRGBO(255, 192, 0, 1);
   // var total = 15;
+  callback(){
+    setState(() {
+      response_1=response_1;
+      myAmount=myAmount;
+    });
+  }
 
   void _handlePaymentSuccess(PaymentSuccessResponse response) {
-    // print(response);
+    print(response);
+    setState(() {
+      response_1=response.paymentId;
+    });
+    var transactionModel = TransactionModel(response: response_1, amount: myAmount);
+    context.read<TransactionModelProvider>().addTransaction(transactionModel);
     // setState(() {
     //   paymentDone = true;
     // });
@@ -126,10 +141,15 @@ class _MyHomePage1State extends State<MyHomePage1> {
                           // Deposit successful, navigate to the home page
                           Navigator.push(
                             context,
+                            
                             MaterialPageRoute(
-                              builder: (context) => const MyHomePage(
-                                title: 'wallet',
+                              builder: (context) =>  MyHomePage(
+                                title: myAmount,
+
                               ),
+                              settings: RouteSettings(
+      arguments: {"response": response_1, "amount":myAmount },
+    ),
                             ),
                           );
                         } else {
@@ -333,23 +353,57 @@ class _MyHomePage1State extends State<MyHomePage1> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Text Box and Button Example'),
-      ),
+     
       body: Padding(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.only(top:90.0,left: 16,right:16),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+             Row(children: [
+                  IconButton(
+            icon: Icon(
+              Icons.arrow_back,
+              color: Colors.black,
+            ),
+            onPressed: () {
+              // Manually trigger the refresh
+              // You can call your refresh logic here
+              // For example, you can update the transaction history
+            },
+          ), 
+          const SizedBox(width: 90,),
+          Text(
+                        "Send Money",
+                        style: GoogleFonts.poppins(textStyle: TextStyle(color:Colors.black,fontSize: 18.0, fontWeight: FontWeight.w600))),
+          
+
+                ],),
+            
+
+
+                   const SizedBox(height: 30,),
+                  Text(
+                        "Send Money to your friends",
+                        style: GoogleFonts.poppins(textStyle: const TextStyle(color:Colors.black,fontSize: 20.0, fontWeight: FontWeight.w400))),
+                           const SizedBox(height: 30,),
+
             TextField(
               controller: _textController,
-              decoration: const InputDecoration(
-                labelText: 'Enter Text',
-              ),
+              decoration:InputDecoration(
+    
+    labelText: 'Amount',
+    floatingLabelBehavior: FloatingLabelBehavior.always,
+    border: OutlineInputBorder(), // Optional: You can still include a border if needed
+  ),
             ),
             const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: () {
+             Align(
+      alignment: Alignment.bottomCenter,
+      child: 
+ TextButton(
+  onPressed: () {
+    
                 setState(() {
                   _displayText = _textController.text;
                   myAmount =
@@ -384,9 +438,62 @@ class _MyHomePage1State extends State<MyHomePage1> {
                     ),
                   );
                 }
-              },
-              child: const Text('Submit'),
-            ),
+              
+  },
+  style: TextButton.styleFrom(
+    backgroundColor: Color(0xff213452),
+    primary: Colors.white,
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(30.0),
+    ),
+  ),
+  child: Padding(
+    padding: const EdgeInsets.only(left:30,top:5,bottom:5,right: 30),
+    child: Text('Proceed to Payment'),
+  ),
+)
+
+    ),
+
+            //ElevatedButton(
+              // onPressed: () {
+              //   setState(() {
+              //     _displayText = _textController.text;
+              //     myAmount =
+              //         int.parse(_textController.text); // Update myAmount here
+              //     total = myAmount;
+              //   });
+              //   //RAZORPAY
+              //   var options = {
+              //     'key': 'rzp_test_jRrCzQJAH4t81Z',
+              //     'amount': (total * 100).toInt(),
+              //     'name': 'Genesis',
+              //     'App Name': 'Genesis',
+              //     'App ID': 'com.example.app',
+              //     'description': 'Student Top-Up',
+              //     'retry': {'enabled': true, 'max_count': 1},
+              //     'send_sms_hash': true,
+              //     'prefill': {
+              //       'contact': '8438006590',
+              //       'email': 'kiruthick012002@gmail.com'
+              //     },
+              //     'external': {
+              //       'wallets': ['paytm']
+              //     },
+              //   };
+              //   try {
+              //     _razorpay.open(options);
+              //   } catch (e) {
+              //     // print(e.toString());
+              //     ScaffoldMessenger.of(context).showSnackBar(
+              //       SnackBar(
+              //         content: Text(e.toString()),
+              //       ),
+              //     );
+              //   }
+              // },
+        //      child: const Text('Submit'),
+        //    ),
             const SizedBox(height: 16),
             Text(
               'Entered Text: $_displayText',

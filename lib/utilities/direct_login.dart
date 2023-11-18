@@ -18,7 +18,7 @@ class Login extends StatelessWidget {
             );
           } else if (snapshot.hasData) {
             return const MyHomePage(
-              title: "Wallet",
+              title: 0,
             );
           } else if (snapshot.hasError) {
             return const Center(

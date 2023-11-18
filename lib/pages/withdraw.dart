@@ -129,7 +129,7 @@ class _MyHomePage1State extends State<MyHomePage1> {
                             context,
                             MaterialPageRoute(
                               builder: (context) => const MyHomePage(
-                                title: 'wallet',
+                                title: 0,//set value
                               ),
                             ),
                           );
