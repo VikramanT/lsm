@@ -1,4 +1,4 @@
-import 'package:app/pages/transfer_acc_to_wallet.dart';
+import 'package:app/pages/student/transfer_acc_to_wallet.dart';
 import 'package:app/pages/transfer_wallet_to_acccount.dart';
 import 'package:app/pages/welcomePage.dart';
 import 'package:app/utilities/direct_login.dart';
