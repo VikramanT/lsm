@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:app/utilities/wallet_creation.dart';
 import 'package:app/utilities/firestore.dart';
+
 class CreateWallet extends StatefulWidget {
   const CreateWallet({Key? key}) : super(key: key);
 
@@ -25,17 +26,17 @@ class _CreateWallet extends State<CreateWallet> {
 
   details() async {
     dynamic data = await getUserDetails();
-    data != null?
-    setState(() {
-      privAddress = data['privateKey'];
-      pubAddress = data['publicKey'];
-      username = data['user_name'];
-      bool created = data['wallet_created'];
-      created == true ? selected = 1 : selected = 0;
-    }):
-    setState(() {
-      selected = 0;
-    });
+    data != null
+        ? setState(() {
+            privAddress = data['privateKey'];
+            pubAddress = data['publicKey'];
+            username = data['user_name'];
+            bool created = data['wallet_created'];
+            created == true ? selected = 1 : selected = 0;
+          })
+        : setState(() {
+            selected = 0;
+          });
   }
 
   @override

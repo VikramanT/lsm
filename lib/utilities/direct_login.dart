@@ -1,4 +1,5 @@
 import 'package:app/pages/LoginPage.dart';
+import 'package:app/pages/student/homepage/homepage.dart';
 import 'package:app/pages/welcomePage.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -17,9 +18,17 @@ class Login extends StatelessWidget {
               child: CircularProgressIndicator(),
             );
           } else if (snapshot.hasData) {
-            return const MyHomePage(
-              title: 0,
-            );
+            return const StudentHomePage();
+            // return const MyHomePage(
+            //   title: 0,
+            // );
+            // return MaterialApp(
+            //   title: 'Flutter Demo',
+            //   debugShowCheckedModeBanner: false,
+            //   theme:
+            //       ThemeData(primarySwatch: Colors.blue, fontFamily: 'Raleway'),
+            //   home: const MyApp1(),
+            // );
           } else if (snapshot.hasError) {
             return const Center(
               child: Text("Something Went wrong!"),
